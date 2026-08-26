@@ -11,12 +11,7 @@ public class Stock {
 	private Map<String, Product> products;
 	
 	public Stock() {
-		
-	}
-
-	public Stock(Map<String, Product> products) {
-		super();
-		this.products = new HashMap<>();
+	    this.products = new HashMap<>();
 	}
 	
 	public void addProduct(Product product) {
