@@ -1,5 +1,9 @@
 package services;
 
+import java.time.YearMonth;
+import java.util.HashMap;
+import java.util.Map;
+
 import entities.Deal;
 import enumEntities.TypeStatus;
 
@@ -22,5 +26,19 @@ public class ServiceReport {
 			
 		}
 		return sum;
+	}
+	
+	public Map<YearMonth, Double> monthlyExpenses() {
+	    Map<YearMonth, Double> result = new HashMap<>();
+
+	    for (Deal deal : cashFlow.getDeals()) {
+	        if (deal.getStatus() == TypeStatus.DESPESA) {
+	            YearMonth month = YearMonth.from(deal.getDate());
+	            double currentTotal = result.getOrDefault(month, 0.0);
+	            result.put(month, currentTotal + deal.getValue());
+	        }
+	    }
+
+	    return result;
 	}
 }
