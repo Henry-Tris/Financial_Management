@@ -39,4 +39,19 @@ public class Stock {
 	public Collection<Product> getAllProducts() {
 	    return products.values();
 	}
+	
+	public boolean sellProduct(String name, int quantity) {
+	    Product product = products.get(name);
+
+	    if (product == null) {
+	        return false;
+	    }
+
+	    if (product.getQuantity() < quantity) {
+	        return false;
+	    }
+
+	    product.setQuantity(product.getQuantity() - quantity);
+	    return true;
+	}
 }
