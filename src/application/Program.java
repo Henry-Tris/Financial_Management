@@ -1,6 +1,7 @@
 package application;
 
 import java.time.LocalDate;
+import java.util.Locale;
 import java.util.Scanner;
 
 import entities.Bills;
@@ -16,6 +17,10 @@ import services.ServiceReport;
 import services.Stock;
 
 public class Program {
+	
+	static {
+		Locale.setDefault(Locale.US);
+	}
 
 	private static Scanner sc = new Scanner(System.in);
 	private static Stock stock = new Stock();
@@ -23,7 +28,7 @@ public class Program {
 	private static ServiceReport serviceReport = new ServiceReport(cashFlow, stock);
 
 	public static void main(String[] args) {
-
+		
 		boolean running = true;
 
 		while (running) {
