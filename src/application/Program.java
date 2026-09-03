@@ -1,5 +1,11 @@
 package application;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,8 +42,11 @@ public class Program {
 	private static TaxRule taxRule;
 
 	private static final double HIGH_VALUE_THRESHOLD = 500.0;
+	private static final String DIRECTORY = "C:\\Users\\Henry\\Documents\\Java\\Arquivos Financial Management\\";
 
 	public static void main(String[] args) {
+
+		loadData();
 
 		boolean running = true;
 
@@ -94,7 +103,8 @@ public class Program {
 				break;
 			case 0:
 				running = false;
-				System.out.println("Encerrando o sistema...");
+				saveData();
+				System.out.println("Dados salvos. Encerrando o sistema...");
 				break;
 			default:
 				System.out.println("Opção inválida.");
@@ -455,6 +465,130 @@ public class Program {
 		System.out.println("Receita total: R$ " + String.format("%.2f", income));
 		System.out.println("Regra aplicada: " + taxRule.getName() + " (" + taxRule.getPercentage() + "%)");
 		System.out.println("Imposto devido: R$ " + String.format("%.2f", tax));
+	}
+
+	// ===== PERSISTÊNCIA =====
+
+	private static void saveData() {
+		try {
+			File dir = new File(DIRECTORY);
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
+
+			BufferedWriter productsWriter = new BufferedWriter(new FileWriter(DIRECTORY + "products.txt"));
+			for (Product p : stock.getAllProducts()) {
+				productsWriter
+						.write(p.getName() + "," + p.getCostPrice() + "," + p.getSalePrice() + "," + p.getQuantity());
+				productsWriter.newLine();
+			}
+			productsWriter.close();
+
+			BufferedWriter dealsWriter = new BufferedWriter(new FileWriter(DIRECTORY + "deals.txt"));
+			for (Deal d : cashFlow.getDeals()) {
+				String bucket = (d.getCategory().getBucket() == null) ? "NULL" : d.getCategory().getBucket().toString();
+				dealsWriter.write(d.getValue() + "," + d.getDate() + "," + d.getStatus() + "," + d.getName() + ","
+						+ d.getCategory().getTitle() + "," + bucket + "," + d.getContext() + "," + d.getPayment());
+				dealsWriter.newLine();
+			}
+			dealsWriter.close();
+
+			BufferedWriter billsWriter = new BufferedWriter(new FileWriter(DIRECTORY + "bills.txt"));
+			for (Bills b : cashFlow.getBills()) {
+				billsWriter.write(b.getName() + "," + b.getValue() + "," + b.getLimit() + "," + b.getPayment());
+				billsWriter.newLine();
+			}
+			billsWriter.close();
+
+			BufferedWriter targetsWriter = new BufferedWriter(new FileWriter(DIRECTORY + "targets.txt"));
+			for (Target t : targets) {
+				targetsWriter.write(t.getGoal() + "," + t.getTargetValue() + "," + t.getCurrentValue());
+				targetsWriter.newLine();
+			}
+			targetsWriter.close();
+
+			BufferedWriter taxWriter = new BufferedWriter(new FileWriter(DIRECTORY + "taxrule.txt"));
+			if (taxRule != null) {
+				taxWriter.write(taxRule.getName() + "," + taxRule.getPercentage());
+				taxWriter.newLine();
+			}
+			taxWriter.close();
+
+		} catch (IOException e) {
+			System.out.println("Erro ao salvar os dados: " + e.getMessage());
+		}
+	}
+
+	private static void loadData() {
+		try {
+			File productsFile = new File(DIRECTORY + "products.txt");
+			if (productsFile.exists()) {
+				BufferedReader reader = new BufferedReader(new FileReader(productsFile));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(",");
+					Product product = new Product(parts[0], Double.parseDouble(parts[1]), Double.parseDouble(parts[2]),
+							Integer.parseInt(parts[3]));
+					stock.addProduct(product);
+				}
+				reader.close();
+			}
+
+			File billsFile = new File(DIRECTORY + "bills.txt");
+			if (billsFile.exists()) {
+				BufferedReader reader = new BufferedReader(new FileReader(billsFile));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(",");
+					Bills bill = new Bills(parts[0], Double.parseDouble(parts[1]), LocalDate.parse(parts[2]),
+							PaymentStatus.valueOf(parts[3]));
+					cashFlow.addBill(bill);
+				}
+				reader.close();
+			}
+
+			File dealsFile = new File(DIRECTORY + "deals.txt");
+			if (dealsFile.exists()) {
+				BufferedReader reader = new BufferedReader(new FileReader(dealsFile));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(",");
+					BudgetBucket bucket = parts[5].equals("NULL") ? null : BudgetBucket.valueOf(parts[5]);
+					Category category = new Category(parts[4], bucket);
+					Deal deal = new Deal(Double.parseDouble(parts[0]), LocalDate.parse(parts[1]),
+							TypeStatus.valueOf(parts[2]), parts[3], category, Context.valueOf(parts[6]),
+							PaymentStatus.valueOf(parts[7]));
+					cashFlow.addDeal(deal);
+				}
+				reader.close();
+			}
+
+			File targetsFile = new File(DIRECTORY + "targets.txt");
+			if (targetsFile.exists()) {
+				BufferedReader reader = new BufferedReader(new FileReader(targetsFile));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					String[] parts = line.split(",");
+					Target target = new Target(parts[0], Double.parseDouble(parts[1]), Double.parseDouble(parts[2]));
+					targets.add(target);
+				}
+				reader.close();
+			}
+
+			File taxFile = new File(DIRECTORY + "taxrule.txt");
+			if (taxFile.exists()) {
+				BufferedReader reader = new BufferedReader(new FileReader(taxFile));
+				String line = reader.readLine();
+				if (line != null) {
+					String[] parts = line.split(",");
+					taxRule = new TaxRule(parts[0], Double.parseDouble(parts[1]));
+				}
+				reader.close();
+			}
+
+		} catch (IOException e) {
+			System.out.println("Erro ao carregar os dados: " + e.getMessage());
+		}
 	}
 
 	private static BudgetBucket askBudgetBucket() {
