@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,8 +53,7 @@ public class Program {
 
         while (running) {
             showMainMenu();
-            int option = sc.nextInt();
-            sc.nextLine();
+            int option = readInt("");
 
             switch (option) {
                 case 1:
@@ -108,9 +108,7 @@ public class Program {
             System.out.println("3 - Descartar produto");
             System.out.println("4 - Ver estoque");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha uma opção: ");
-            int option = sc.nextInt();
-            sc.nextLine();
+            int option = readInt("Escolha uma opção: ");
 
             switch (option) {
                 case 1:
@@ -144,9 +142,7 @@ public class Program {
             System.out.println("2 - Adicionar conta a pagar");
             System.out.println("3 - Pagar conta pendente");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha uma opção: ");
-            int option = sc.nextInt();
-            sc.nextLine();
+            int option = readInt("Escolha uma opção: ");
 
             switch (option) {
                 case 1:
@@ -178,9 +174,7 @@ public class Program {
             System.out.println("3 - Método 50/30/20");
             System.out.println("4 - Ranking de categorias");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha uma opção: ");
-            int option = sc.nextInt();
-            sc.nextLine();
+            int option = readInt("Escolha uma opção: ");
 
             switch (option) {
                 case 1:
@@ -214,9 +208,7 @@ public class Program {
             System.out.println("2 - Ver metas");
             System.out.println("3 - Atualizar progresso");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha uma opção: ");
-            int option = sc.nextInt();
-            sc.nextLine();
+            int option = readInt("Escolha uma opção: ");
 
             switch (option) {
                 case 1:
@@ -246,9 +238,7 @@ public class Program {
             System.out.println("1 - Definir regra de imposto");
             System.out.println("2 - Calcular imposto");
             System.out.println("0 - Voltar");
-            System.out.print("Escolha uma opção: ");
-            int option = sc.nextInt();
-            sc.nextLine();
+            int option = readInt("Escolha uma opção: ");
 
             switch (option) {
                 case 1:
@@ -268,12 +258,38 @@ public class Program {
 
     // ===== MÉTODOS DE VALIDAÇÃO REUTILIZÁVEIS =====
 
+    private static int readInt(String prompt) {
+        while (true) {
+            try {
+                System.out.print(prompt);
+                int value = sc.nextInt();
+                sc.nextLine();
+                return value;
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada inválida! Digite um número inteiro.");
+                sc.nextLine();
+            }
+        }
+    }
+
+    private static double readDouble(String prompt) {
+        while (true) {
+            try {
+                System.out.print(prompt);
+                double value = sc.nextDouble();
+                sc.nextLine();
+                return value;
+            } catch (InputMismatchException e) {
+                System.out.println("Entrada inválida! Digite um número (use ponto para decimais).");
+                sc.nextLine();
+            }
+        }
+    }
+
     private static double readPositiveDouble(String prompt) {
         double value;
         do {
-            System.out.print(prompt);
-            value = sc.nextDouble();
-            sc.nextLine();
+            value = readDouble(prompt);
             if (value <= 0) {
                 System.out.println("Valor inválido! Digite um número maior que zero.");
             }
@@ -284,9 +300,7 @@ public class Program {
     private static int readPositiveInt(String prompt) {
         int value;
         do {
-            System.out.print(prompt);
-            value = sc.nextInt();
-            sc.nextLine();
+            value = readInt(prompt);
             if (value <= 0) {
                 System.out.println("Valor inválido! Digite um número maior que zero.");
             }
@@ -309,9 +323,7 @@ public class Program {
     private static int readIntInRange(String prompt, int min, int max) {
         int value;
         do {
-            System.out.print(prompt);
-            value = sc.nextInt();
-            sc.nextLine();
+            value = readInt(prompt);
             if (value < min || value > max) {
                 System.out.println("Opção inválida! Digite um número entre " + min + " e " + max + ".");
             }
@@ -495,9 +507,7 @@ public class Program {
             System.out.println((i + 1) + " - " + bill.getName() + " - R$ " + String.format("%.2f", bill.getValue()));
         }
 
-        System.out.print("Escolha o número da conta paga: ");
-        int choice = sc.nextInt();
-        sc.nextLine();
+        int choice = readInt("Escolha o número da conta paga: ");
 
         if (choice < 1 || choice > pendingBills.size()) {
             System.out.println("Opção inválida.");
@@ -535,9 +545,7 @@ public class Program {
         String goal = readNonEmptyString("Nome da meta: ");
         double targetValue = readPositiveDouble("Valor alvo: ");
 
-        System.out.print("Valor já guardado (0 se está começando agora): ");
-        double currentValue = sc.nextDouble();
-        sc.nextLine();
+        double currentValue = readDouble("Valor já guardado (0 se está começando agora): ");
 
         Target target = new Target(goal, targetValue, currentValue);
         targets.add(target);
@@ -570,9 +578,7 @@ public class Program {
 
         viewTargets();
 
-        System.out.print("Escolha o número da meta: ");
-        int choice = sc.nextInt();
-        sc.nextLine();
+        int choice = readInt("Escolha o número da meta: ");
 
         if (choice < 1 || choice > targets.size()) {
             System.out.println("Opção inválida.");
@@ -581,9 +587,7 @@ public class Program {
 
         Target target = targets.get(choice - 1);
 
-        System.out.print("1 - Adicionar valor / 2 - Retirar valor: ");
-        int action = sc.nextInt();
-        sc.nextLine();
+        int action = readInt("1 - Adicionar valor / 2 - Retirar valor: ");
 
         double amount = readPositiveDouble("Valor: ");
 

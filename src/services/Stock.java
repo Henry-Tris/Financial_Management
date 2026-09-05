@@ -1,7 +1,7 @@
 package services;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import entities.Product;
@@ -11,7 +11,7 @@ public class Stock {
 	private Map<String, Product> products;
 	
 	public Stock() {
-	    this.products = new HashMap<>();
+	    this.products = new LinkedHashMap<>();
 	}
 	
 	public void addProduct(Product product) {
@@ -23,6 +23,7 @@ public class Stock {
 			double avgCost = (oldTotalCost + newTotalCost) / totalQuantity;
 			existing.setCostPrice(avgCost);
 			existing.setQuantity(totalQuantity);
+			existing.setSalePrice(product.getSalePrice());
 		} else {
 			products.put(product.getName(), product);
 		}
